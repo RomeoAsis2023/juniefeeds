@@ -105,7 +105,7 @@
     </style>
 </head>
 <body>
-    <div id="loginContainer">
+    <div id="loginContainer" class="hidden">
         <h1>Login</h1>
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
@@ -127,123 +127,142 @@
     </div>
 
     <script>
-    const GITHUB_API_URL = 'https://api.github.com/gists';
-    const GIST_ID = 'd49113761873618dec0038fbdbcca913'; // Replace with your Gist ID
+        const GITHUB_API_URL = 'https://api.github.com/gists';
+        const GIST_ID = 'd49113761873618dec0038fbdbcca913'; // Replace with your Gist ID
 
-    let TOKEN = ''; // Token will be assigned after login
+        let TOKEN = ''; // Token will be assigned after login
 
-    const loginContainer = document.getElementById('loginContainer');
-    const microblogContainer = document.getElementById('microblogContainer');
-    const loginButton = document.getElementById('loginButton');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const tokenInput = document.getElementById('token');
-    const loginError = document.getElementById('loginError');
+        const loginContainer = document.getElementById('loginContainer');
+        const microblogContainer = document.getElementById('microblogContainer');
+        const loginButton = document.getElementById('loginButton');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const tokenInput = document.getElementById('token');
+        const loginError = document.getElementById('loginError');
 
-    const VALID_USERNAME = 'demo';
-    const VALID_PASSWORD = 'demo';
+        const VALID_USERNAME = 'demo';
+        const VALID_PASSWORD = 'demo';
 
-    loginButton.addEventListener('click', () => {
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-        const token = tokenInput.value;
+        // Check if user is already logged in
+        const savedUsername = localStorage.getItem('username');
+        const savedPassword = localStorage.getItem('password');
+        const savedToken = localStorage.getItem('token');
 
-        if (username === VALID_USERNAME && password === VALID_PASSWORD && token) {
-            TOKEN = token; // Assign the entered token
+        if (savedUsername === VALID_USERNAME && savedPassword === VALID_PASSWORD && savedToken) {
+            TOKEN = savedToken;
             loginContainer.classList.add('hidden');
             microblogContainer.classList.remove('hidden');
             fetchPosts();
         } else {
-            loginError.classList.remove('hidden');
+            loginContainer.classList.remove('hidden');
         }
-    });
 
-    const postsContainer = document.getElementById('posts');
-    const postForm = document.getElementById('postForm');
-    const titleInput = document.getElementById('title');
-    const descriptionInput = document.getElementById('description');
+        loginButton.addEventListener('click', () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            const token = tokenInput.value;
 
-    // Fetch posts
-    async function fetchPosts() {
-        try {
-            const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
-                headers: {
-                    Authorization: `token ${TOKEN}`,
-                },
-            });
-            const data = await response.json();
-            const content = JSON.parse(data.files['mypost.json'].content || '[]'); // Ensure content is an array
-            renderPosts(content);
-            return content;
-        } catch (error) {
-            console.error('Error fetching posts:', error);
-            return []; // Return an empty array on error
-        }
-    }
+            if (username === VALID_USERNAME && password === VALID_PASSWORD && token) {
+                TOKEN = token; // Assign the entered token
 
-    // Save posts
-    async function savePosts(posts) {
-        try {
-            const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
-                method: 'PATCH',
-                headers: {
-                    Authorization: `token ${TOKEN}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    files: {
-                        'mypost.json': {
-                            content: JSON.stringify(posts, null, 2),
-                        },
-                    },
-                }),
-            });
-            if (!response.ok) {
-                throw new Error('Failed to save posts');
+                // Save credentials in localStorage
+                localStorage.setItem('username', username);
+                localStorage.setItem('password', password);
+                localStorage.setItem('token', token);
+
+                loginContainer.classList.add('hidden');
+                microblogContainer.classList.remove('hidden');
+                fetchPosts();
+            } else {
+                loginError.classList.remove('hidden');
             }
-        } catch (error) {
-            console.error('Error saving posts:', error);
-        }
-    }
-
-    // Render posts
-    function renderPosts(posts) {
-        postsContainer.innerHTML = '';
-        posts.forEach((post, index) => {
-            const postDiv = document.createElement('div');
-            postDiv.className = 'post';
-            postDiv.innerHTML = `
-                <h2>${post.title}</h2>
-                <p>${post.description}</p>
-                <button class="btn delete" onclick="deletePost(${index})">Delete</button>
-            `;
-            postsContainer.appendChild(postDiv);
         });
-    }
 
-    // Add post
-    postForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newPost = {
-            title: titleInput.value,
-            description: descriptionInput.value,
-        };
-        const posts = await fetchPosts(); // Ensure posts are fetched correctly
-        posts.push(newPost); // Add the new post
-        await savePosts(posts); // Save the updated posts
-        titleInput.value = '';
-        descriptionInput.value = '';
-        renderPosts(posts); // Re-render the posts
-    });
+        const postsContainer = document.getElementById('posts');
+        const postForm = document.getElementById('postForm');
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
 
-    // Delete post
-    async function deletePost(index) {
-        const posts = await fetchPosts();
-        posts.splice(index, 1); // Remove the selected post
-        await savePosts(posts); // Save the updated posts
-        renderPosts(posts); // Re-render the posts
-    }
-</script>
+        // Fetch posts
+        async function fetchPosts() {
+            try {
+                const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
+                    headers: {
+                        Authorization: `token ${TOKEN}`,
+                    },
+                });
+                const data = await response.json();
+                const content = JSON.parse(data.files['mypost.json'].content || '[]'); // Ensure content is an array
+                renderPosts(content);
+                return content;
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                return []; // Return an empty array on error
+            }
+        }
 
+        // Save posts
+        async function savePosts(posts) {
+            try {
+                const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `token ${TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            'mypost.json': {
+                                content: JSON.stringify(posts, null, 2),
+                            },
+                        },
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to save posts');
+                }
+            } catch (error) {
+                console.error('Error saving posts:', error);
+            }
+        }
+
+        // Render posts
+        function renderPosts(posts) {
+            postsContainer.innerHTML = '';
+            posts.forEach((post, index) => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.innerHTML = `
+                    <h2>${post.title}</h2>
+                    <p>${post.description}</p>
+                    <button class="btn delete" onclick="deletePost(${index})">Delete</button>
+                `;
+                postsContainer.appendChild(postDiv);
+            });
+        }
+
+        // Add post
+        postForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPost = {
+                title: titleInput.value,
+                description: descriptionInput.value,
+            };
+            const posts = await fetchPosts(); // Ensure posts are fetched correctly
+            posts.push(newPost); // Add the new post
+            await savePosts(posts); // Save the updated posts
+            titleInput.value = '';
+            descriptionInput.value = '';
+            renderPosts(posts); // Re-render the posts
+        });
+
+        // Delete post
+        async function deletePost(index) {
+            const posts = await fetchPosts();
+            posts.splice(index, 1); // Remove the selected post
+            await savePosts(posts); // Save the updated posts
+            renderPosts(posts); // Re-render the posts
+        }
+    </script>
 </body>
 </html>

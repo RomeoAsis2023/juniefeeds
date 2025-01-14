@@ -72,12 +72,12 @@
             width: calc(100% - 20px);
         }
 
-        #loginForm {
+        #loginContainer {
             text-align: center;
             margin-top: 100px;
         }
 
-        #loginForm input {
+        #loginContainer input {
             display: block;
             margin: 10px auto;
             padding: 10px;
@@ -86,7 +86,7 @@
             border-radius: 4px;
         }
 
-        #loginForm button {
+        #loginContainer button {
             padding: 10px 20px;
             background: #007bff;
             color: #fff;
@@ -97,7 +97,6 @@
 
         #loginError {
             color: red;
-            text-align: center;
         }
 
         .hidden {
@@ -107,13 +106,12 @@
 </head>
 <body>
     <div id="loginContainer">
-        <form id="loginForm">
-            <h1>Login</h1>
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-            <p id="loginError" class="hidden">Invalid username or password</p>
-        </form>
+        <h1>Login</h1>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <input type="text" id="token" placeholder="Personal Access Token">
+        <button id="loginButton">Login</button>
+        <p id="loginError" class="hidden">Invalid username, password, or token</p>
     </div>
 
     <div id="microblogContainer" class="hidden container">
@@ -129,25 +127,32 @@
     </div>
 
     <script>
+        const GITHUB_API_URL = 'https://api.github.com/gists';
+        const GIST_ID = 'd49113761873618dec0038fbdbcca913'; // Replace with your Gist ID
+
+        let TOKEN = ''; // Token will be assigned after login
+
         const loginContainer = document.getElementById('loginContainer');
         const microblogContainer = document.getElementById('microblogContainer');
-        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
+        const tokenInput = document.getElementById('token');
         const loginError = document.getElementById('loginError');
 
         const VALID_USERNAME = 'demo';
         const VALID_PASSWORD = 'demo';
 
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
+        loginButton.addEventListener('click', () => {
             const username = usernameInput.value;
             const password = passwordInput.value;
+            const token = tokenInput.value;
 
-            if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+            if (username === VALID_USERNAME && password === VALID_PASSWORD && token) {
+                TOKEN = token; // Assign the entered token
                 loginContainer.classList.add('hidden');
                 microblogContainer.classList.remove('hidden');
+                fetchPosts();
             } else {
                 loginError.classList.remove('hidden');
             }
@@ -158,53 +163,49 @@
         const titleInput = document.getElementById('title');
         const descriptionInput = document.getElementById('description');
 
-        const GITHUB_API_URL = 'https://api.github.com/gists';
-        const GIST_ID = 'd49113761873618dec0038fbdbcca913'; // Replace with your GitHub Gist ID
-        const TOKEN = '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'; // Replace with your GitHub Personal Access Token
-
+        // Fetch posts
         async function fetchPosts() {
             try {
                 const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
                     headers: {
-                        'Authorization': `token ${TOKEN}`
-                    }
+                        Authorization: `token ${TOKEN}`,
+                    },
                 });
                 const data = await response.json();
                 const content = JSON.parse(data.files['mypost.json'].content);
-                return content;
+                renderPosts(content);
             } catch (error) {
                 console.error('Error fetching posts:', error);
-                return [];
             }
         }
 
+        // Save posts
         async function savePosts(posts) {
             try {
                 const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
                     method: 'PATCH',
                     headers: {
-                        'Authorization': `token ${TOKEN}`,
-                        'Content-Type': 'application/json'
+                        Authorization: `token ${TOKEN}`,
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         files: {
                             'mypost.json': {
-                                content: JSON.stringify(posts, null, 2)
-                            }
-                        }
-                    })
+                                content: JSON.stringify(posts, null, 2),
+                            },
+                        },
+                    }),
                 });
-                return response.ok;
+                if (!response.ok) {
+                    throw new Error('Failed to save posts');
+                }
             } catch (error) {
                 console.error('Error saving posts:', error);
-                return false;
             }
         }
 
-        let posts = [];
-
-        async function renderPosts() {
-            posts = await fetchPosts();
+        // Render posts
+        function renderPosts(posts) {
             postsContainer.innerHTML = '';
             posts.forEach((post, index) => {
                 const postDiv = document.createElement('div');
@@ -218,35 +219,28 @@
             });
         }
 
-        async function addPost(e) {
+        // Add post
+        postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newPost = {
                 title: titleInput.value,
-                description: descriptionInput.value
+                description: descriptionInput.value,
             };
+            const posts = await fetchPosts();
             posts.push(newPost);
-            const success = await savePosts(posts);
-            if (success) {
-                titleInput.value = '';
-                descriptionInput.value = '';
-                renderPosts();
-            } else {
-                alert('Failed to save post');
-            }
-        }
+            await savePosts(posts);
+            titleInput.value = '';
+            descriptionInput.value = '';
+            renderPosts(posts);
+        });
 
+        // Delete post
         async function deletePost(index) {
+            const posts = await fetchPosts();
             posts.splice(index, 1);
-            const success = await savePosts(posts);
-            if (success) {
-                renderPosts();
-            } else {
-                alert('Failed to delete post');
-            }
+            await savePosts(posts);
+            renderPosts(posts);
         }
-
-        postForm.addEventListener('submit', addPost);
-        renderPosts();
     </script>
 </body>
 </html>

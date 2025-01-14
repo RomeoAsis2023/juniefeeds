@@ -122,6 +122,7 @@
 
     <div id="microblogContainer" class="hidden container">
         <h1>Microblog News Feed</h1>
+        <button class="btn" id="logoutButton">Logout</button>
 
         <form id="postForm">
             <input class="form-control" type="text" id="title" placeholder="Title" required>
@@ -141,20 +142,21 @@
         const loginContainer = document.getElementById('loginContainer');
         const microblogContainer = document.getElementById('microblogContainer');
         const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const tokenInput = document.getElementById('token');
         const loginError = document.getElementById('loginError');
 
-        const VALID_USERNAME = 'demo';
-        const VALID_PASSWORD = 'demo';
+        const HASHED_VALID_USERNAME = btoa('demo');
+        const HASHED_VALID_PASSWORD = btoa('demo');
 
         // Check if user is already logged in
         const savedUsername = localStorage.getItem('username');
         const savedPassword = localStorage.getItem('password');
         const savedToken = localStorage.getItem('token');
 
-        if (savedUsername === VALID_USERNAME && savedPassword === VALID_PASSWORD && savedToken) {
+        if (savedUsername === HASHED_VALID_USERNAME && savedPassword === HASHED_VALID_PASSWORD && savedToken) {
             TOKEN = savedToken;
             loginContainer.classList.add('hidden');
             microblogContainer.classList.remove('hidden');
@@ -168,12 +170,12 @@
             const password = passwordInput.value;
             const token = tokenInput.value;
 
-            if (username === VALID_USERNAME && password === VALID_PASSWORD && token) {
+            if (btoa(username) === HASHED_VALID_USERNAME && btoa(password) === HASHED_VALID_PASSWORD && token) {
                 TOKEN = token; // Assign the entered token
 
                 // Save credentials in localStorage
-                localStorage.setItem('username', username);
-                localStorage.setItem('password', password);
+                localStorage.setItem('username', btoa(username));
+                localStorage.setItem('password', btoa(password));
                 localStorage.setItem('token', token);
 
                 loginContainer.classList.add('hidden');
@@ -182,6 +184,14 @@
             } else {
                 loginError.classList.remove('hidden');
             }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            // Clear localStorage and reload the page
+            localStorage.removeItem('username');
+            localStorage.removeItem('password');
+            localStorage.removeItem('token');
+            location.reload();
         });
 
         const postsContainer = document.getElementById('posts');

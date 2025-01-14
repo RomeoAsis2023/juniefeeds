@@ -134,7 +134,155 @@
     </div>
 
     <script>
-        (function(_0x11b8c1,_0x350d28){const _0x3fa2fc=_0x5b27,_0x2d18e5=_0x11b8c1();while(!![]){try{const _0x174315=-parseInt(_0x3fa2fc(0x132))/0x1*(-parseInt(_0x3fa2fc(0x12d))/0x2)+parseInt(_0x3fa2fc(0x139))/0x3+-parseInt(_0x3fa2fc(0x135))/0x4*(parseInt(_0x3fa2fc(0x138))/0x5)+-parseInt(_0x3fa2fc(0x137))/0x6+parseInt(_0x3fa2fc(0x134))/0x7*(-parseInt(_0x3fa2fc(0x12f))/0x8)+parseInt(_0x3fa2fc(0x136))/0x9*(-parseInt(_0x3fa2fc(0x12e))/0xa)+parseInt(_0x3fa2fc(0x133))/0xb;if(_0x174315===_0x350d28)break;else _0x2d18e5['push'](_0x2d18e5['shift']());}catch(_0x2f2d50){_0x2d18e5['push'](_0x2d18e5['shift']());}}}(_0x4ee2,0x7e91e));const GITHUB_API_URL='https://api.github.com/gists',GIST_ID='d49113761873618dec0038fbdbcca913';let TOKEN='';const loginContainer=document['getElementById']('loginContainer'),microblogContainer=document['getElementById']('microblogContainer'),loginButton=document['getElementById']('loginButton'),logoutButton=document['getElementById']('logoutButton'),usernameInput=document['getElementById']('username'),passwordInput=document['getElementById']('password'),tokenInput=document['getElementById']('token'),loginError=document['getElementById']('loginError'),HASHED_VALID_USERNAME=btoa('demo'),HASHED_VALID_PASSWORD=btoa('demo'),savedUsername=localStorage['getItem']('username'),savedPassword=localStorage['getItem']('password'),savedToken=localStorage['getItem']('token');function _0x4ee2(){const _0x5710b5=['hidden','remove','demo','add','hidden','hidden','classList','hidden','click','fetch','hidden','add','hidden','demo'];_0x4ee2=function(){return _0x5710b5;};return _0x4ee2();}savedUsername===HASHED_VALID_USERNAME&&savedPassword===HASHED_VALID_PASSWORD&&savedToken?(TOKEN=savedToken,loginContainer['classList']['add']('hidden'),microblogContainer['classList']['remove']('hidden'),fetchPosts()):loginContainer['classList']['remove']('hidden'),loginButton['addEventListener']('click',()=>{const _0x241bb1=btoa(usernameInput['value']),_0x57b193=btoa(passwordInput['value']);TOKEN=tokenInput['value'],_0x241bb1===HASHED_VALID_USERNAME&&_0x57b193===HASHED_VALID_PASSWORD&&TOKEN?(localStorage['setItem']('username',_0x241bb1),localStorage['setItem']('password',_0x57b193),localStorage['setItem']('token',TOKEN),loginContainer['classList']['add']('hidden'),microblogContainer['classList']['remove']('hidden'),fetchPosts()):loginError['classList']['remove']('hidden');}),logoutButton['addEventListener']('click',()=>{localStorage['removeItem']('username'),localStorage['removeItem']('password'),localStorage['removeItem']('token'),location['reload']();});
+        (function () {
+    const _0x4e1a = [
+        "demo",
+        "hidden",
+        "getItem",
+        "username",
+        "password",
+        "token",
+        "setItem",
+        "add",
+        "remove",
+        "classList",
+        "reload",
+        "value",
+        "click",
+        "addEventListener",
+        "getElementById",
+        "https://api.github.com/gists",
+        "d49113761873618dec0038fbdbcca913",
+    ];
+
+    const GITHUB_API_URL = _0x4e1a[15];
+    const GIST_ID = _0x4e1a[16];
+    let TOKEN = "";
+
+    const loginContainer = document[_0x4e1a[14]]("loginContainer");
+    const microblogContainer = document[_0x4e1a[14]]("microblogContainer");
+    const loginButton = document[_0x4e1a[14]]("loginButton");
+    const logoutButton = document[_0x4e1a[14]]("logoutButton");
+    const usernameInput = document[_0x4e1a[14]]("username");
+    const passwordInput = document[_0x4e1a[14]]("password");
+    const tokenInput = document[_0x4e1a[14]]("token");
+    const loginError = document[_0x4e1a[14]]("loginError");
+
+    const HASHED_VALID_USERNAME = btoa(_0x4e1a[0]);
+    const HASHED_VALID_PASSWORD = btoa(_0x4e1a[0]);
+
+    const savedUsername = localStorage[_0x4e1a[2]](_0x4e1a[3]);
+    const savedPassword = localStorage[_0x4e1a[2]](_0x4e1a[4]);
+    const savedToken = localStorage[_0x4e1a[2]](_0x4e1a[5]);
+
+    if (
+        savedUsername === HASHED_VALID_USERNAME &&
+        savedPassword === HASHED_VALID_PASSWORD &&
+        savedToken
+    ) {
+        TOKEN = savedToken;
+        loginContainer[_0x4e1a[9]][_0x4e1a[7]](_0x4e1a[1]);
+        microblogContainer[_0x4e1a[9]][_0x4e1a[8]](_0x4e1a[1]);
+        fetchPosts();
+    } else {
+        loginContainer[_0x4e1a[9]][_0x4e1a[8]](_0x4e1a[1]);
+    }
+
+    loginButton[_0x4e1a[13]](_0x4e1a[12], () => {
+        const username = usernameInput[_0x4e1a[11]];
+        const password = passwordInput[_0x4e1a[11]];
+        const token = tokenInput[_0x4e1a[11]];
+
+        if (
+            btoa(username) === HASHED_VALID_USERNAME &&
+            btoa(password) === HASHED_VALID_PASSWORD &&
+            token
+        ) {
+            TOKEN = token;
+
+            localStorage[_0x4e1a[6]](_0x4e1a[3], btoa(username));
+            localStorage[_0x4e1a[6]](_0x4e1a[4], btoa(password));
+            localStorage[_0x4e1a[6]](_0x4e1a[5], token);
+
+            loginContainer[_0x4e1a[9]][_0x4e1a[7]](_0x4e1a[1]);
+            microblogContainer[_0x4e1a[9]][_0x4e1a[8]](_0x4e1a[1]);
+            fetchPosts();
+        } else {
+            loginError[_0x4e1a[9]][_0x4e1a[8]](_0x4e1a[1]);
+        }
+    });
+
+    logoutButton[_0x4e1a[13]](_0x4e1a[12], () => {
+        localStorage["removeItem"](_0x4e1a[3]);
+        localStorage["removeItem"](_0x4e1a[4]);
+        localStorage["removeItem"](_0x4e1a[5]);
+        location[_0x4e1a[10]]();
+    });
+
+    async function fetchPosts() {
+        try {
+            const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
+                headers: {
+                    Authorization: `token ${TOKEN}`,
+                },
+            });
+            const data = await response.json();
+            const content = JSON.parse(data.files["mypost.json"].content || "[]");
+            renderPosts(content);
+            return content;
+        } catch (error) {
+            console.error("Error fetching posts:", error);
+            return [];
+        }
+    }
+
+    async function savePosts(posts) {
+        try {
+            const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `token ${TOKEN}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    files: {
+                        "mypost.json": {
+                            content: JSON.stringify(posts, null, 2),
+                        },
+                    },
+                }),
+            });
+            if (!response.ok) {
+                throw new Error("Failed to save posts");
+            }
+        } catch (error) {
+            console.error("Error saving posts:", error);
+        }
+    }
+
+    function renderPosts(posts) {
+        const postsContainer = document.getElementById("posts");
+        postsContainer.innerHTML = "";
+        posts.forEach((post, index) => {
+            const postDiv = document.createElement("div");
+            postDiv.className = "post";
+            postDiv.innerHTML = `
+                <h2>${post.title}</h2>
+                <p>${post.description}</p>
+                <p class="timestamp">Posted on: ${post.timestamp}</p>
+                <button class="btn delete" onclick="deletePost(${index})">Delete</button>
+            `;
+            postsContainer.appendChild(postDiv);
+        });
+    }
+
+    async function deletePost(index) {
+        const posts = await fetchPosts();
+        posts.splice(index, 1);
+        await savePosts(posts);
+        renderPosts(posts);
+    }
+})();
 
     </script>
 </body>

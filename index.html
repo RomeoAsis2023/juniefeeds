@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microblog News Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .post {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .post h2 {
+            margin: 0 0 10px;
+        }
+
+        .post p {
+            margin: 0 0 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 5px 0;
+            padding: 5px 10px;
+            color: #fff;
+            background: #007bff;
+            border: none;
+            border-radius: 3px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn.delete {
+            background: #dc3545;
+        }
+
+        .form-control {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #postForm {
+            margin-bottom: 20px;
+        }
+
+        #postForm input, #postForm textarea {
+            width: calc(100% - 20px);
+        }
+
+        #loginForm {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        #loginForm input {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #loginForm button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #loginError {
+            color: red;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginContainer">
+        <form id="loginForm">
+            <h1>Login</h1>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <p id="loginError" class="hidden">Invalid username or password</p>
+        </form>
+    </div>
+
+    <div id="microblogContainer" class="hidden container">
+        <h1>Microblog News Feed</h1>
+
+        <form id="postForm">
+            <input class="form-control" type="text" id="title" placeholder="Title" required>
+            <textarea class="form-control" id="description" rows="4" placeholder="Description" required></textarea>
+            <button class="btn" type="submit">Add Post</button>
+        </form>
+
+        <div id="posts"></div>
+    </div>
+
+    <script>
+        const loginContainer = document.getElementById('loginContainer');
+        const microblogContainer = document.getElementById('microblogContainer');
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginError = document.getElementById('loginError');
+
+        const VALID_USERNAME = 'demo';
+        const VALID_PASSWORD = 'demo';
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+                loginContainer.classList.add('hidden');
+                microblogContainer.classList.remove('hidden');
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        const postsContainer = document.getElementById('posts');
+        const postForm = document.getElementById('postForm');
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+
+        const GITHUB_API_URL = 'https://api.github.com/gists';
+        const GIST_ID = 'd49113761873618dec0038fbdbcca913'; // Replace with your GitHub Gist ID
+        const TOKEN = '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'; // Replace with your GitHub Personal Access Token
+
+        async function fetchPosts() {
+            try {
+                const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
+                    headers: {
+                        'Authorization': `token ${TOKEN}`
+                    }
+                });
+                const data = await response.json();
+                const content = JSON.parse(data.files['mypost.json'].content);
+                return content;
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                return [];
+            }
+        }
+
+        async function savePosts(posts) {
+            try {
+                const response = await fetch(`${GITHUB_API_URL}/${GIST_ID}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `token ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            'mypost.json': {
+                                content: JSON.stringify(posts, null, 2)
+                            }
+                        }
+                    })
+                });
+                return response.ok;
+            } catch (error) {
+                console.error('Error saving posts:', error);
+                return false;
+            }
+        }
+
+        let posts = [];
+
+        async function renderPosts() {
+            posts = await fetchPosts();
+            postsContainer.innerHTML = '';
+            posts.forEach((post, index) => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.innerHTML = `
+                    <h2>${post.title}</h2>
+                    <p>${post.description}</p>
+                    <button class="btn delete" onclick="deletePost(${index})">Delete</button>
+                `;
+                postsContainer.appendChild(postDiv);
+            });
+        }
+
+        async function addPost(e) {
+            e.preventDefault();
+            const newPost = {
+                title: titleInput.value,
+                description: descriptionInput.value
+            };
+            posts.push(newPost);
+            const success = await savePosts(posts);
+            if (success) {
+                titleInput.value = '';
+                descriptionInput.value = '';
+                renderPosts();
+            } else {
+                alert('Failed to save post');
+            }
+        }
+
+        async function deletePost(index) {
+            posts.splice(index, 1);
+            const success = await savePosts(posts);
+            if (success) {
+                renderPosts();
+            } else {
+                alert('Failed to delete post');
+            }
+        }
+
+        postForm.addEventListener('submit', addPost);
+        renderPosts();
+    </script>
+</body>
+</html>

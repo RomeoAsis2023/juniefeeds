@@ -40,6 +40,12 @@
             margin: 0 0 5px;
         }
 
+        .post .timestamp {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 10px;
+        }
+
         .btn {
             display: inline-block;
             margin: 5px 0;
@@ -235,6 +241,7 @@
                 postDiv.innerHTML = `
                     <h2>${post.title}</h2>
                     <p>${post.description}</p>
+                    <p class="timestamp">Posted on: ${post.timestamp}</p>
                     <button class="btn delete" onclick="deletePost(${index})">Delete</button>
                 `;
                 postsContainer.appendChild(postDiv);
@@ -247,6 +254,7 @@
             const newPost = {
                 title: titleInput.value,
                 description: descriptionInput.value,
+                timestamp: new Date().toLocaleString(), // Add timestamp
             };
             const posts = await fetchPosts(); // Ensure posts are fetched correctly
             posts.push(newPost); // Add the new post

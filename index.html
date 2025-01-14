@@ -134,7 +134,7 @@
     </div>
 
     <script>
-        (function () {
+       (function () {
     const _0x4e1a = [
         "demo",
         "hidden",
@@ -153,6 +153,10 @@
         "getElementById",
         "https://api.github.com/gists",
         "d49113761873618dec0038fbdbcca913",
+        "mypost.json",
+        "Failed to save posts",
+        "Error fetching posts:",
+        "Error saving posts:",
     ];
 
     const GITHUB_API_URL = _0x4e1a[15];
@@ -227,11 +231,11 @@
                 },
             });
             const data = await response.json();
-            const content = JSON.parse(data.files["mypost.json"].content || "[]");
+            const content = JSON.parse(data.files[_0x4e1a[17]].content || "[]");
             renderPosts(content);
             return content;
         } catch (error) {
-            console.error("Error fetching posts:", error);
+            console.error(_0x4e1a[19], error);
             return [];
         }
     }
@@ -246,17 +250,17 @@
                 },
                 body: JSON.stringify({
                     files: {
-                        "mypost.json": {
+                        [_0x4e1a[17]]: {
                             content: JSON.stringify(posts, null, 2),
                         },
                     },
                 }),
             });
             if (!response.ok) {
-                throw new Error("Failed to save posts");
+                throw new Error(_0x4e1a[18]);
             }
         } catch (error) {
-            console.error("Error saving posts:", error);
+            console.error(_0x4e1a[20], error);
         }
     }
 
@@ -282,6 +286,25 @@
         await savePosts(posts);
         renderPosts(posts);
     }
+
+    const postForm = document.getElementById("postForm");
+    const titleInput = document.getElementById("title");
+    const descriptionInput = document.getElementById("description");
+
+    postForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const newPost = {
+            title: titleInput.value,
+            description: descriptionInput.value,
+            timestamp: new Date().toLocaleString(),
+        };
+        const posts = await fetchPosts();
+        posts.push(newPost);
+        await savePosts(posts);
+        titleInput.value = "";
+        descriptionInput.value = "";
+        renderPosts(posts);
+    });
 })();
 
     </script>
